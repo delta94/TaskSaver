@@ -8,8 +8,8 @@ const path_1 = __importDefault(require("path"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const checkAuth_1 = require("./api/utils/checkAuth");
-const tasks_1 = require("./api/routes/tasks");
-const auth_1 = require("./api/routes/auth");
+const tasksRouter_1 = require("./api/routes/tasksRouter");
+const authRouter_1 = require("./api/routes/authRouter");
 mongoose_1.default.connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.66hev.mongodb.net/test?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -22,9 +22,9 @@ app.use(cors_1.default());
 // @ts-ignore
 app.use(express_1.default.json({ limit: '10mb', extended: true }));
 app.use(express_1.default.urlencoded({ limit: '10mb', extended: false }));
-app.use(`${prefix}/tasks`, checkAuth_1.checkAuth, tasks_1.tasksRoutes);
-app.use(`${prefix}/auth`, auth_1.authRoutes);
-const port = process.env.PORT || 3000;
+app.use(`${prefix}/tasks`, checkAuth_1.checkAuth, tasksRouter_1.tasksRoutes);
+app.use(`${prefix}/auth`, authRouter_1.authRoutes);
+const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Listening on port: ${port}`));
 app.use(express_1.default.static(path_1.default.join(__dirname, 'build')));
 app.get('/*', (_req, res) => {
