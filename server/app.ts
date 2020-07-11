@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { checkAuth } from './api/utils/checkAuth';
@@ -28,10 +29,10 @@ app.use(`${prefix}/auth`, authRoutes);
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port: ${port}`));
 
-app.use((_req, _res, next) => {
-  const error = new Error('Not Found');
-  error['status'] = 404;
-  next(error);
+app.use(express.static(path.join(__dirname, 'build')));
+
+app.get('/*', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.use((error, _req, res, _next) => {
