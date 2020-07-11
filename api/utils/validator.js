@@ -20,9 +20,9 @@ const taskOperationTypes = {
 };
 exports.taskOperationTypes = taskOperationTypes;
 const validateUser = (user, operationType) => {
-    const { firstName, lastName, phone, username, email, password } = user;
+    const { firstName, lastName, phone, username, email, password, role } = user;
     if (operationType === authFormsTypes.register) {
-        if (firstName && lastName && phone && username && email && password) {
+        if (firstName && lastName && phone && username && email && password && role) {
             return (nameRegex.test(firstName) && nameRegex.test(lastName) && phoneRegex.test(phone) &&
                 usernameRegex.test(username) && emailRegex.test(email) && password.length > 2);
         }

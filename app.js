@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const path_1 = __importDefault(require("path"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const checkAuth_1 = require("./api/utils/checkAuth");
@@ -26,9 +25,10 @@ app.use(`${prefix}/tasks`, checkAuth_1.checkAuth, tasksRouter_1.tasksRoutes);
 app.use(`${prefix}/auth`, authRouter_1.authRoutes);
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Listening on port: ${port}`));
-app.use(express_1.default.static(path_1.default.join(__dirname, 'build')));
-app.get('/*', (_req, res) => {
-    res.sendFile(path_1.default.join(__dirname, 'build', 'index.html'));
+app.use((_req, _res, next) => {
+    const error = new Error('Not Found');
+    error['status'] = 404;
+    next(error);
 });
 app.use((error, _req, res, _next) => {
     res.status(error.status || 500);

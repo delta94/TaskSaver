@@ -12,18 +12,8 @@ const userSchema = mongoose_1.default.Schema({
     lastName: { type: String, require: true },
     username: { type: String, require: true, unique: true },
     password: { type: String, require: true },
-    phone: {
-        type: String,
-        require: true,
-        unique: true,
-        match: validator_1.phoneRegex
-    },
-    email: {
-        type: String,
-        require: true,
-        unique: true,
-        match: validator_1.emailRegex
-    }
+    phone: { type: String, require: true, match: validator_1.phoneRegex },
+    email: { type: String, require: true, unique: true, match: validator_1.emailRegex }
 });
 exports.User = mongoose_1.default.model('User', userSchema);
 //# sourceMappingURL=user.js.map
