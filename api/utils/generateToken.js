@@ -7,7 +7,7 @@ exports.generateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.generateToken = (firstName, lastName) => {
     return jsonwebtoken_1.default.sign({ firstName, lastName }, process.env.SECRET_KEY, {
-        expiresIn: '1H'
+        expiresIn: '1d'
     });
 };
 //# sourceMappingURL=generateToken.js.map

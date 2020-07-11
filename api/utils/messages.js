@@ -4,6 +4,7 @@ exports.messages = void 0;
 exports.messages = {
     authSucceeded: "Auth succeeded",
     authFailed: "Auth failed",
+    registrationFailed: "Registration failed",
     emailExists: "Email is already exists",
     noUser: "User not found",
     noId: "Id not found",
