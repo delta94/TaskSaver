@@ -1,0 +1,7 @@
+  {
+    "env": {
+      "MONGO_USERNAME": "propit",
+      "MONGO_PASSWORD": "9nFJWRg4JYWw6N89",
+      "SECRET_KEY": "todolist"
+    }
+  }

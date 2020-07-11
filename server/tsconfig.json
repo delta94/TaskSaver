@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "outDir": "./build",
+    "module": "CommonJS",
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "moduleResolution": "Node",
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "noEmitHelpers": false,
+    "types": [
+      "node",
+    ],
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.collection",
+      "es2015.core",
+      "ES2015.Proxy",
+      "ES2015.Symbol",
+      "ES2015.Iterable",
+      "es2015.symbol.wellknown"
+    ]
+  }
+}
