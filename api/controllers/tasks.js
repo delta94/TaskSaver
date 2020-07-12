@@ -17,7 +17,7 @@ const messages_1 = require("../utils/messages");
 const { fillCorrectly, noUser, noId, unauthorized, created, updated, deleted } = messages_1.messages;
 const getAllTasks = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id: userId } = req.params;
+        const { userId } = req;
         const user = yield user_1.User.findOne({ _id: userId });
         const isAdmin = user.role === 0;
         let tasks;
@@ -99,4 +99,3 @@ const deleteTask = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.deleteTask = deleteTask;
-//# sourceMappingURL=tasks.js.map

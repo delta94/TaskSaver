@@ -42,4 +42,3 @@ const validateTask = (task, operationType) => {
     return isValidate;
 };
 exports.validateTask = validateTask;
-//# sourceMappingURL=validator.js.map

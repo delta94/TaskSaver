@@ -16,4 +16,3 @@ const userSchema = mongoose_1.default.Schema({
     email: { type: String, require: true, unique: true, match: validator_1.emailRegex }
 });
 exports.User = mongoose_1.default.model('User', userSchema);
-//# sourceMappingURL=user.js.map

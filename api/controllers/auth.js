@@ -31,7 +31,7 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
                     const user = new user_1.User({ firstName, lastName, phone, username, email, role, password: hash });
                     // @ts-ignore
                     const newUser = yield user.save();
-                    const token = generateToken_1.generateToken(firstName, lastName);
+                    const token = generateToken_1.generateToken(newUser._id);
                     const userData = { _id: newUser._id, role };
                     return res.status(200).json({ message: `User ${created}`, user: userData, token });
                 }
@@ -63,9 +63,9 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             }
             const isEqual = bcrypt_1.default.compareSync(password, user.password);
             if (isEqual) {
-                const { _id, firstName, lastName, username, role } = user;
+                const { _id, username, role } = user;
                 const userData = { _id, username, role };
-                const token = firstName && lastName && generateToken_1.generateToken(firstName, lastName);
+                const token = generateToken_1.generateToken(_id);
                 return res.status(200).json({ message: authSucceeded, user: userData, token });
             }
             else {
@@ -81,4 +81,3 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.login = login;
-//# sourceMappingURL=auth.js.map

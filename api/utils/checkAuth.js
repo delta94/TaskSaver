@@ -9,11 +9,11 @@ const messages_1 = require("./messages");
 exports.checkAuth = (req, res, next) => {
     try {
         const token = req.headers.authorization.split('Bearer ')[1];
-        jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY);
+        const payload = jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY);
+        req.userId = payload.userId;
         next();
     }
     catch (error) {
         res.status(401).json({ message: messages_1.messages.authFailed });
     }
 };
-//# sourceMappingURL=checkAuth.js.map

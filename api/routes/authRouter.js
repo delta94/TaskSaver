@@ -10,4 +10,3 @@ const authRoutes = express_1.default.Router();
 exports.authRoutes = authRoutes;
 authRoutes.post('/register', auth_1.register);
 authRoutes.post('/login', auth_1.login);
-//# sourceMappingURL=authRouter.js.map

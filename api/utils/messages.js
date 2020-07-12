@@ -14,4 +14,3 @@ exports.messages = {
     updated: "updated successfully",
     deleted: "deleted successfully"
 };
-//# sourceMappingURL=messages.js.map

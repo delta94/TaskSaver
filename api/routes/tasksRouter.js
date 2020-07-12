@@ -8,8 +8,7 @@ const express_1 = __importDefault(require("express"));
 const tasks_1 = require("../controllers/tasks");
 const tasksRoutes = express_1.default.Router();
 exports.tasksRoutes = tasksRoutes;
-tasksRoutes.get('/:id', tasks_1.getAllTasks);
+tasksRoutes.get('/', tasks_1.getAllTasks);
 tasksRoutes.post('/', tasks_1.createTask);
 tasksRoutes.put('/:id', tasks_1.updateTask);
 tasksRoutes.delete('/:id', tasks_1.deleteTask);
-//# sourceMappingURL=tasksRouter.js.map
