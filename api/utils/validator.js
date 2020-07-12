@@ -21,20 +21,41 @@ const taskOperationTypes = {
 exports.taskOperationTypes = taskOperationTypes;
 const validateUser = (user, operationType) => {
     const { firstName, lastName, phone, username, email, password, role } = user;
-    if (operationType === authFormsTypes.register) {
-        if (firstName && lastName && phone && username && email && password && role) {
-            return (nameRegex.test(firstName) && nameRegex.test(lastName) && phoneRegex.test(phone) &&
-                usernameRegex.test(username) && emailRegex.test(email) && password.length > 2);
+    let res = { isValid: true, errors: [] };
+    if (!emailRegex.test(email)) {
+        res.errors.push('Please insert a valid email address');
+    }
+    if (password.length < 3) {
+        res.errors.push('Password must contain at least 3 characters');
+    }
+    if (operationType === authFormsTypes.register && firstName && lastName && phone && username && role) {
+        if (!nameRegex.test(firstName)) {
+            res.errors.push('Please insert a valid first name');
+        }
+        if (!nameRegex.test(lastName)) {
+            res.errors.push('Please insert a valid last name');
+        }
+        if (!phoneRegex.test(phone)) {
+            res.errors.push('Please insert a valid phone number');
+        }
+        if (!usernameRegex.test(username)) {
+            res.errors.push('Username must contain at least 3 characters');
+        }
+        if (role !== 0 && role !== 1) {
+            res.errors.push('Role must be 0 or 1');
         }
     }
-    return (email && password && emailRegex.test(email) && password.length > 2);
+    if (res.errors.length > 0) {
+        res.isValid = false;
+    }
+    return res;
 };
 exports.validateUser = validateUser;
 const validateTask = (task, operationType) => {
     const { _id, userId, title, description, content, createdAt } = task;
     let isValidate = userId && title && description && content;
     if (operationType === taskOperationTypes.create) {
-        isValidate += createdAt;
+        isValidate = isValidate && createdAt;
     }
     else if (operationType === taskOperationTypes.update && !_id) {
         isValidate = false;

@@ -95,7 +95,7 @@ const deleteTask = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         }
     }
     else {
-        res.status(404).json({ message: noId });
+        res.status(404).json({ message: `Task ${noId}` });
     }
 });
 exports.deleteTask = deleteTask;

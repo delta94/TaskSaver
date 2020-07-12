@@ -21,8 +21,8 @@ const messages_1 = require("../utils/messages");
 const { authSucceeded, authFailed, registrationFailed, usernameExists, emailExists, fillCorrectly, created } = messages_1.messages;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, phone, username, email, password, role } = req.body;
-    const isValidate = validator_1.validateUser(req.body, validator_1.authFormsTypes.register);
-    if (isValidate) {
+    const validationRes = validator_1.validateUser(req.body, validator_1.authFormsTypes.register);
+    if (validationRes.isValid) {
         try {
             const userByEmail = yield user_1.User.findOne({ email });
             const userByUsername = yield user_1.User.findOne({ username });
@@ -50,14 +50,14 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         }
     }
     else {
-        res.status(400).json({ message: fillCorrectly });
+        res.status(400).json({ message: validationRes.errors[0] });
     }
 });
 exports.register = register;
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    const isValidate = validator_1.validateUser(req.body, validator_1.authFormsTypes.login);
-    if (isValidate) {
+    const validationRes = validator_1.validateUser(req.body, validator_1.authFormsTypes.login);
+    if (validationRes.isValid) {
         try {
             const user = yield user_1.User.findOne({ email });
             if (!user) {
@@ -79,7 +79,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         }
     }
     else {
-        res.status(400).json({ message: fillCorrectly });
+        res.status(400).json({ message: validationRes.errors[0] });
     }
 });
 exports.login = login;
