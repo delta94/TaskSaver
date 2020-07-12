@@ -18,29 +18,31 @@ const user_1 = require("../models/user");
 const validator_1 = require("../utils/validator");
 const generateToken_1 = require("../utils/generateToken");
 const messages_1 = require("../utils/messages");
-const { authSucceeded, authFailed, registrationFailed, emailExists, fillCorrectly, created } = messages_1.messages;
+const { authSucceeded, authFailed, registrationFailed, usernameExists, emailExists, fillCorrectly, created } = messages_1.messages;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, phone, username, email, password, role } = req.body;
     const isValidate = validator_1.validateUser(req.body, validator_1.authFormsTypes.register);
     if (isValidate) {
         try {
-            const user = yield user_1.User.findOne({ email });
-            if (!user) {
-                const hash = bcrypt_1.default.hashSync(password, 10);
-                try {
-                    const user = new user_1.User({ firstName, lastName, phone, username, email, role, password: hash });
-                    // @ts-ignore
-                    const newUser = yield user.save();
-                    const token = generateToken_1.generateToken(newUser._id);
-                    const userData = { _id: newUser._id, role };
-                    return res.status(200).json({ message: `User ${created}`, user: userData, token });
-                }
-                catch (err) {
-                    return res.status(400).json({ message: registrationFailed });
-                }
-            }
-            else {
+            const userByEmail = yield user_1.User.findOne({ email });
+            const userByUsername = yield user_1.User.findOne({ username });
+            if (userByEmail) {
                 return res.status(409).json({ message: emailExists });
+            }
+            if (userByUsername) {
+                return res.status(409).json({ message: usernameExists });
+            }
+            const hash = bcrypt_1.default.hashSync(password, 10);
+            try {
+                const user = new user_1.User({ firstName, lastName, phone, username, email, role, password: hash });
+                // @ts-ignore
+                const newUser = yield user.save();
+                const token = generateToken_1.generateToken(newUser._id);
+                const userData = { _id: newUser._id, role };
+                return res.status(200).json({ message: `User ${created}`, user: userData, token });
+            }
+            catch (err) {
+                return res.status(400).json({ message: registrationFailed });
             }
         }
         catch (err) {
