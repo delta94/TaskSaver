@@ -18,7 +18,7 @@ const user_1 = require("../models/user");
 const validator_1 = require("../utils/validator");
 const generateToken_1 = require("../utils/generateToken");
 const messages_1 = require("../utils/messages");
-const { authSucceeded, authFailed, registrationFailed, usernameExists, emailExists, fillCorrectly, created } = messages_1.messages;
+const { authSucceeded, authFailed, registrationFailed, usernameExists, emailExists, created } = messages_1.messages;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, phone, username, email, password, role } = req.body;
     const validationRes = validator_1.validateUser(req.body, validator_1.authFormsTypes.register);

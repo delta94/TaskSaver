@@ -10,10 +10,10 @@ const cors_1 = __importDefault(require("cors"));
 const checkAuth_1 = require("./api/utils/checkAuth");
 const tasksRouter_1 = require("./api/routes/tasksRouter");
 const authRouter_1 = require("./api/routes/authRouter");
-mongoose_1.default.connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.66hev.mongodb.net/test?retryWrites=true&w=majority`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true
+mongoose_1.default.connect(process.env.DB_CONNECTION_STRING, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
 });
 mongoose_1.default.connection.on('connected', () => console.log('MongoDB Connected!'));
 const app = express_1.default();
