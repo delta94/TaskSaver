@@ -44,7 +44,6 @@ const createTask = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
                 return res.status(404).json({ message: noUser });
             }
             const task = new task_1.Task({ userId, title, description, content, createdAt });
-            // @ts-ignore
             yield task.save();
             return res.status(200).json({ message: `Task ${created}` });
         }

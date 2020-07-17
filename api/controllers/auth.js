@@ -35,7 +35,6 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             const hash = bcrypt_1.default.hashSync(password, 10);
             try {
                 const user = new user_1.User({ firstName, lastName, phone, username, email, role, password: hash });
-                // @ts-ignore
                 const newUser = yield user.save();
                 const token = generateToken_1.generateToken(newUser._id);
                 const userData = { _id: newUser._id, role };
