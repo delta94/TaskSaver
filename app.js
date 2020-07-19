@@ -1,6 +1,6 @@
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+  return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
@@ -15,23 +15,23 @@ mongoose_1.default.connect(process.env.DB_CONNECTION_STRING, {
   useUnifiedTopology: true,
   useCreateIndex: true
 });
-mongoose_1.default.connection.on('connected', () => console.log('MongoDB Connected!'));
+mongoose_1.default.connection.on("connected", () => console.log("MongoDB Connected!"));
 const app = express_1.default();
-const prefix = '/api';
+const prefix = "/api";
 app.use(cors_1.default());
 // @ts-ignore
-app.use(express_1.default.json({ limit: '10mb', extended: true }));
-app.use(express_1.default.urlencoded({ limit: '10mb', extended: false }));
+app.use(express_1.default.json({ limit: "10mb", extended: true }));
+app.use(express_1.default.urlencoded({ limit: "10mb", extended: false }));
 app.use(`${prefix}/tasks`, checkAuth_1.checkAuth, tasksRouter_1.tasksRoutes);
 app.use(`${prefix}/auth`, authRouter_1.authRoutes);
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Listening on port: ${port}`));
-app.use(express_1.default.static(path_1.default.join(__dirname, 'build')));
-app.get('/*', (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, 'build', 'index.html'));
+app.use(express_1.default.static(path_1.default.join(__dirname, "build")));
+app.get("/*", (req, res) => {
+  res.sendFile(path_1.default.join(__dirname, "build", "index.html"));
 });
 app.use((error, _req, res, _next) => {
-    res.status(error.status || 500);
-    res.json({ message: error.message });
+  res.status(error.status || 500);
+  res.json({ message: error.message });
 });
 module.exports = app;
