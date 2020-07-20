@@ -19,7 +19,7 @@ const getAllTasks = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
   try {
     const { userId } = req;
     const user = yield user_1.User.findOne({ _id: userId });
-    const isAdmin = user.role === 0;
+    const isAdmin = (user === null || user === void 0 ? void 0 : user.role) === 0;
     let tasks;
     if (isAdmin) {
       tasks = yield task_1.Task.find().populate("userId", ["username", "email"]);
@@ -64,7 +64,7 @@ const updateTask = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     try {
       const task = yield task_1.Task.findOne({ _id: taskId });
       const user = yield user_1.User.findOne({ _id: userId });
-      const isAdmin = user.role === 0;
+      const isAdmin = (user === null || user === void 0 ? void 0 : user.role) === 0;
       if (isAdmin || `${task.userId}` === `${userId}`) {
         yield task_1.Task.updateOne({ _id: taskId }, { title, description });
         return res.status(200).json({ message: `Task ${updated}` });

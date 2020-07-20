@@ -10,7 +10,7 @@ const cors_1 = __importDefault(require("cors"));
 const checkAuth_1 = require("./api/utils/checkAuth");
 const tasksRouter_1 = require("./api/routes/tasksRouter");
 const authRouter_1 = require("./api/routes/authRouter");
-mongoose_1.default.connect(process.env.DB_CONNECTION_STRING, {
+mongoose_1.default.connect(`${process.env.DB_CONNECTION_STRING}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
@@ -19,8 +19,7 @@ mongoose_1.default.connection.on("connected", () => console.log("MongoDB Connect
 const app = express_1.default();
 const prefix = "/api";
 app.use(cors_1.default());
-// @ts-ignore
-app.use(express_1.default.json({ limit: "10mb", extended: true }));
+app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ limit: "10mb", extended: false }));
 app.use(`${prefix}/tasks`, checkAuth_1.checkAuth, tasksRouter_1.tasksRoutes);
 app.use(`${prefix}/auth`, authRouter_1.authRoutes);
