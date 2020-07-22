@@ -13,6 +13,7 @@ exports.checkAuth = (req, res, next) => {
             const token = req.headers.authorization.split("Bearer ")[1];
             const payload = jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY);
             req.userId = payload.userId;
+            req.isAdmin = payload.role === 0;
             next();
         }
         catch (error) {

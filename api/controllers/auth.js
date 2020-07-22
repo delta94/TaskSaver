@@ -36,7 +36,7 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             try {
                 const user = new user_1.User({ firstName, lastName, username, email, role, password: hash });
                 const newUser = yield user.save();
-                const token = generateToken_1.generateToken(newUser._id);
+                const token = generateToken_1.generateToken(newUser._id, role);
                 const userData = { _id: newUser._id, role };
                 return res.status(200).json({ message: `User ${created}`, user: userData, token });
             }
@@ -66,7 +66,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             if (isEqual) {
                 const { _id, username, role } = user;
                 const userData = { _id, username, role };
-                const token = generateToken_1.generateToken(_id);
+                const token = generateToken_1.generateToken(_id, role);
                 return res.status(200).json({ message: authSucceeded, user: userData, token });
             }
             else {
