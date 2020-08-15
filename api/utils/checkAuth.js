@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkAuth = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const messages_1 = require("./messages");
+// To do: Implement authentication for socket.io
+// If a user is deleted the relevant token must be deleted to
 exports.checkAuth = (req, res, next) => {
     var _a, _b;
     if (((_a = req.headers) === null || _a === void 0 ? void 0 : _a.authorization) && ((_b = process.env) === null || _b === void 0 ? void 0 : _b.SECRET_KEY)) {

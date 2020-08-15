@@ -9,6 +9,7 @@ const taskSchema = new mongoose_1.default.Schema({
     userId: { type: mongoose_1.default.SchemaTypes.ObjectId, required: true, ref: "User" },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    createdAt: { type: Date, required: true }
+    createdAt: { type: Date, required: true },
+    status: { type: Number, enum: [0, 1], required: true }
 });
 exports.Task = mongoose_1.default.model("Task", taskSchema);

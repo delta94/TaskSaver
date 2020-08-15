@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateTask = exports.validateUser = exports.taskOperationTypes = exports.authFormsTypes = exports.usernameRegex = exports.nameRegex = exports.emailRegex = void 0;
+exports.validateTask = exports.validateUser = exports.taskFormOperationTypes = exports.authFormsTypes = exports.usernameRegex = exports.nameRegex = exports.emailRegex = void 0;
 const emailRegex = new RegExp(/[a-z0-9!#$%&"*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&"*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/);
 exports.emailRegex = emailRegex;
 const nameRegex = new RegExp(/[a-zA-Z][a-zA-Z ]+/);
@@ -12,14 +12,14 @@ const authFormsTypes = {
     register: "Register"
 };
 exports.authFormsTypes = authFormsTypes;
-const taskOperationTypes = {
+const taskFormOperationTypes = {
     create: "Add",
     update: "Update"
 };
-exports.taskOperationTypes = taskOperationTypes;
+exports.taskFormOperationTypes = taskFormOperationTypes;
 const validateUser = (user, operationType) => {
-    const { firstName, lastName, username, email, password, role } = user;
-    let res = { isValid: true, errors: [] };
+    const { firstName, lastName, username, email, password, role, organizationId } = user;
+    const res = { isValid: true, errors: [] };
     if (!emailRegex.test(email)) {
         res.errors.push("Please insert a valid email address");
     }
@@ -37,7 +37,10 @@ const validateUser = (user, operationType) => {
             res.errors.push("Username must contain at least 3 characters");
         }
         if (role !== 0 && role !== 1) {
-            res.errors.push("Role must be 0 or 1");
+            res.errors.push("User role must be 0 or 1");
+        }
+        if (!organizationId) {
+            res.errors.push("User must belong to an organization");
         }
     }
     if (res.errors.length > 0) {
@@ -47,13 +50,13 @@ const validateUser = (user, operationType) => {
 };
 exports.validateUser = validateUser;
 const validateTask = (task, operationType) => {
-    const { _id, userId, title, description, createdAt } = task;
+    const { _id, userId, title, description, createdAt, status } = task;
     let isValidate = userId && title && description;
-    if (operationType === taskOperationTypes.create) {
+    if (operationType === taskFormOperationTypes.create) {
         isValidate = isValidate && createdAt;
     }
-    else if (operationType === taskOperationTypes.update && !_id) {
-        isValidate = false;
+    else {
+        isValidate = isValidate && _id && status === 0 || status === 1;
     }
     return isValidate;
 };

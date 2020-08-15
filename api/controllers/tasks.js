@@ -8,90 +8,117 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTask = exports.updateTask = exports.createTask = exports.getAllTasks = void 0;
 const task_1 = require("../models/task");
 const user_1 = require("../models/user");
 const validator_1 = require("../utils/validator");
+const app_1 = require("../../app");
 const messages_1 = require("../utils/messages");
-const { fillCorrectly, noUser, noId, unauthorized, created, updated, deleted } = messages_1.messages;
-const getAllTasks = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const { fillCorrectly, noUser, noId, unauthorized } = messages_1.messages;
+const getAllTasks = (room) => __awaiter(void 0, void 0, void 0, function* () {
+    var e_1, _a;
+    const organizationId = room;
     try {
-        const { userId, isAdmin } = req;
-        let tasks;
-        if (isAdmin) {
-            tasks = yield task_1.Task.find().populate("userId", ["username", "email"]);
+        const users = yield user_1.User.find({ organizationId });
+        //@ts-ignore
+        const userIds = users.map(user => user._id);
+        let tasks = [];
+        try {
+            for (var userIds_1 = __asyncValues(userIds), userIds_1_1; userIds_1_1 = yield userIds_1.next(), !userIds_1_1.done;) {
+                const _id = userIds_1_1.value;
+                const tasksById = yield task_1.Task.find({ userId: _id }).populate("userId", ["username", "email"]);
+                tasks = [...tasks, ...tasksById];
+            }
         }
-        else {
-            tasks = yield task_1.Task.find({ userId }).populate("userId", ["username", "email"]);
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (userIds_1_1 && !userIds_1_1.done && (_a = userIds_1.return)) yield _a.call(userIds_1);
+            }
+            finally { if (e_1) throw e_1.error; }
         }
-        return res.status(200).json(tasks);
+        app_1.io.to(room).emit("initialTasks", tasks);
     }
     catch (err) {
-        next(err);
+        app_1.logger.error(err);
     }
 });
 exports.getAllTasks = getAllTasks;
-const createTask = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, title, description, createdAt } = req.body;
-    const isValidate = validator_1.validateTask(req.body, validator_1.taskOperationTypes.create);
+const createTask = (task, room) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, title, description, createdAt } = task;
+    const isValidate = validator_1.validateTask(task, validator_1.taskFormOperationTypes.create);
     if (isValidate) {
         try {
             const user = yield user_1.User.findOne({ _id: userId });
             if (!user) {
-                return res.status(404).json({ message: noUser });
+                app_1.logger.error(noUser);
             }
-            const task = new task_1.Task({ userId, title, description, createdAt });
+            const task = new task_1.Task({ userId, title, description, createdAt, status: 0 });
             yield task.save();
-            return res.status(200).json({ message: `Task ${created}` });
+            //@ts-ignore
+            app_1.io.to(room).emit("newTask", Object.assign(Object.assign({}, task._doc), { userId: { _id: user.id, username: user.username, email: user.email } }));
         }
         catch (err) {
-            next(err);
+            app_1.logger.error(err);
         }
     }
     else {
-        res.status(400).json({ message: fillCorrectly });
+        app_1.logger.error(fillCorrectly);
     }
 });
 exports.createTask = createTask;
-const updateTask = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { isAdmin } = req;
-    const { id: taskId } = req.params;
-    const { userId, title, description } = req.body;
-    const isValidate = validator_1.validateTask(req.body, validator_1.taskOperationTypes.update);
+const updateTask = (taskToUpdate, userId, room) => __awaiter(void 0, void 0, void 0, function* () {
+    const { _id: taskId, title, description, status } = taskToUpdate;
+    const isValidate = validator_1.validateTask(taskToUpdate, validator_1.taskFormOperationTypes.update);
     if (isValidate) {
         try {
             const task = yield task_1.Task.findOne({ _id: taskId });
-            if (isAdmin || `${task.userId}` === `${userId}`) {
-                yield task_1.Task.updateOne({ _id: taskId }, { title, description });
-                return res.status(200).json({ message: `Task ${updated}` });
+            const loggedInUser = yield user_1.User.findOne({ _id: userId });
+            const isAdmin = (loggedInUser === null || loggedInUser === void 0 ? void 0 : loggedInUser.role) === 0;
+            // To do : get loggedInUser and isAdmin from authentication
+            // remove duplicates from deleteTask
+            if (isAdmin || `${task === null || task === void 0 ? void 0 : task.userId._id}` === `${userId}`) {
+                const updatedTask = yield task_1.Task.findOneAndUpdate({ _id: taskId }, { title, description, status }, { new: true, useFindAndModify: false }).populate("userId", ["username", "email"]);
+                app_1.io.to(room).emit("updatedTask", updatedTask);
             }
             else {
-                return res.status(401).json({ message: unauthorized });
+                app_1.logger.error(unauthorized);
             }
         }
         catch (err) {
-            next(err);
+            app_1.logger.error(err);
         }
     }
     else {
-        res.status(400).json({ message: fillCorrectly });
+        app_1.logger.error(fillCorrectly);
     }
 });
 exports.updateTask = updateTask;
-const deleteTask = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id: taskId } = req.params;
+const deleteTask = (taskId, userId, room) => __awaiter(void 0, void 0, void 0, function* () {
     if (taskId) {
         try {
-            yield task_1.Task.deleteOne({ _id: taskId });
-            return res.status(200).json({ message: `Task ${deleted}` });
+            const task = yield task_1.Task.findOne({ _id: taskId });
+            const loggedInUser = yield user_1.User.findOne({ _id: userId });
+            const isAdmin = (loggedInUser === null || loggedInUser === void 0 ? void 0 : loggedInUser.role) === 0;
+            if (isAdmin || `${task === null || task === void 0 ? void 0 : task.userId._id}` === `${userId}`) {
+                yield task_1.Task.deleteOne({ _id: taskId });
+                app_1.io.to(room).emit("deletedTaskId", taskId);
+            }
         }
         catch (err) {
-            next(err);
+            app_1.logger.error(err);
         }
     }
     else {
-        res.status(404).json({ message: `Task ${noId}` });
+        app_1.logger.error(noId);
     }
 });
 exports.deleteTask = deleteTask;

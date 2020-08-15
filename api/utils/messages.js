@@ -12,6 +12,5 @@ exports.messages = {
     unauthorized: "Unauthorized",
     fillCorrectly: "Please fill out form correctly",
     created: "created successfully",
-    updated: "updated successfully",
-    deleted: "deleted successfully"
+    gotOrganizations: "Got all organizations"
 };
