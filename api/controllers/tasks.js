@@ -33,9 +33,9 @@ const getAllTasks = (room) => __awaiter(void 0, void 0, void 0, function* () {
         let tasks = [];
         try {
             for (var userIds_1 = __asyncValues(userIds), userIds_1_1; userIds_1_1 = yield userIds_1.next(), !userIds_1_1.done;) {
-                const _id = userIds_1_1.value;
-                const tasksById = yield task_1.Task.find({ userId: _id }).populate("userId", ["username", "email"]);
-                tasks = [...tasks, ...tasksById];
+                const userId = userIds_1_1.value;
+                const tasksByUserId = yield task_1.Task.find({ userId }).populate("userId", ["username", "email"]);
+                tasks = [...tasks, ...tasksByUserId];
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -61,8 +61,7 @@ const createTask = (task, room) => __awaiter(void 0, void 0, void 0, function* (
             if (!user) {
                 app_1.logger.error(noUser);
             }
-            const task = new task_1.Task({ userId, title, description, createdAt, status: 0 });
-            yield task.save();
+            const task = yield task_1.Task.create({ userId, title, description, createdAt, status: 0 });
             //@ts-ignore
             app_1.io.to(room).emit("newTask", Object.assign(Object.assign({}, task._doc), { userId: { _id: user.id, username: user.username, email: user.email } }));
         }
@@ -83,8 +82,6 @@ const updateTask = (taskToUpdate, userId, room) => __awaiter(void 0, void 0, voi
             const task = yield task_1.Task.findOne({ _id: taskId });
             const loggedInUser = yield user_1.User.findOne({ _id: userId });
             const isAdmin = (loggedInUser === null || loggedInUser === void 0 ? void 0 : loggedInUser.role) === 0;
-            // To do : get loggedInUser and isAdmin from authentication
-            // remove duplicates from deleteTask
             if (isAdmin || `${task === null || task === void 0 ? void 0 : task.userId._id}` === `${userId}`) {
                 const updatedTask = yield task_1.Task.findOneAndUpdate({ _id: taskId }, { title, description, status }, { new: true, useFindAndModify: false }).populate("userId", ["username", "email"]);
                 app_1.io.to(room).emit("updatedTask", updatedTask);
