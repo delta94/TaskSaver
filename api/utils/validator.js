@@ -50,10 +50,10 @@ const validateUser = (user, operationType) => {
 };
 exports.validateUser = validateUser;
 const validateTask = (task, operationType) => {
-    const { _id, userId, title, description, createdAt, status } = task;
-    let isValidate = userId && title && description;
+    const { _id, title, description, createdAt, status, user } = task;
+    let isValidate = title && description;
     if (operationType === taskFormOperationTypes.create) {
-        isValidate = isValidate && createdAt;
+        isValidate = isValidate && createdAt && user;
     }
     else {
         isValidate = isValidate && _id && status === 0 || status === 1;

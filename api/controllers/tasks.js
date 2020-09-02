@@ -17,7 +17,6 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTask = exports.updateTask = exports.createTask = exports.getAllTasks = void 0;
-const task_1 = require("../models/task");
 const user_1 = require("../models/user");
 const validator_1 = require("../utils/validator");
 const app_1 = require("../../app");
@@ -27,21 +26,25 @@ const getAllTasks = (room) => __awaiter(void 0, void 0, void 0, function* () {
     var e_1, _a;
     const organizationId = room;
     try {
-        const users = yield user_1.User.find({ organizationId });
-        //@ts-ignore
-        const userIds = users.map(user => user._id);
-        let tasks = [];
+        const users = yield user_1.User.find({}).where({ organizationId }).select(["email", "tasks"]);
+        const tasks = [];
         try {
-            for (var userIds_1 = __asyncValues(userIds), userIds_1_1; userIds_1_1 = yield userIds_1.next(), !userIds_1_1.done;) {
-                const userId = userIds_1_1.value;
-                const tasksByUserId = yield task_1.Task.find({ userId }).populate("userId", ["username", "email"]);
-                tasks = [...tasks, ...tasksByUserId];
+            for (var users_1 = __asyncValues(users), users_1_1; users_1_1 = yield users_1.next(), !users_1_1.done;) {
+                const user = users_1_1.value;
+                if (user.tasks) {
+                    for (const task of user.tasks) {
+                        tasks.push(Object.assign(Object.assign({}, task._doc), { user: {
+                                _id: user._id,
+                                email: user.email
+                            } }));
+                    }
+                }
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (userIds_1_1 && !userIds_1_1.done && (_a = userIds_1.return)) yield _a.call(userIds_1);
+                if (users_1_1 && !users_1_1.done && (_a = users_1.return)) yield _a.call(users_1);
             }
             finally { if (e_1) throw e_1.error; }
         }
@@ -53,17 +56,23 @@ const getAllTasks = (room) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getAllTasks = getAllTasks;
 const createTask = (task, room) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, title, description, createdAt } = task;
+    var _b;
     const isValidate = validator_1.validateTask(task, validator_1.taskFormOperationTypes.create);
     if (isValidate) {
         try {
-            const user = yield user_1.User.findOne({ _id: userId });
+            const user = yield user_1.User.findOne({ _id: (_b = task.user) === null || _b === void 0 ? void 0 : _b._id });
             if (!user) {
-                app_1.logger.error(noUser);
+                return app_1.logger.error(noUser);
             }
-            const task = yield task_1.Task.create({ userId, title, description, createdAt, status: 0 });
-            //@ts-ignore
-            app_1.io.to(room).emit("newTask", Object.assign(Object.assign({}, task._doc), { userId: { _id: user.id, username: user.username, email: user.email } }));
+            // @ts-ignore
+            const newTask = user.tasks.create(Object.assign(Object.assign({}, task), { status: 0 }));
+            // @ts-ignore
+            user.tasks.push(newTask);
+            yield user.save();
+            app_1.io.to(room).emit("newTask", Object.assign(Object.assign({}, newTask._doc), { user: {
+                    _id: user._id,
+                    email: user.email
+                } }));
         }
         catch (err) {
             app_1.logger.error(err);
@@ -74,16 +83,22 @@ const createTask = (task, room) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.createTask = createTask;
-const updateTask = (taskToUpdate, userId, room) => __awaiter(void 0, void 0, void 0, function* () {
+const updateTask = (taskToUpdate, loggedInUserId, loggedInUserRole, room) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c, _d;
     const { _id: taskId, title, description, status } = taskToUpdate;
     const isValidate = validator_1.validateTask(taskToUpdate, validator_1.taskFormOperationTypes.update);
     if (isValidate) {
         try {
-            const task = yield task_1.Task.findOne({ _id: taskId });
-            const loggedInUser = yield user_1.User.findOne({ _id: userId });
-            const isAdmin = (loggedInUser === null || loggedInUser === void 0 ? void 0 : loggedInUser.role) === 0;
-            if (isAdmin || `${task === null || task === void 0 ? void 0 : task.userId._id}` === `${userId}`) {
-                const updatedTask = yield task_1.Task.findOneAndUpdate({ _id: taskId }, { title, description, status }, { new: true, useFindAndModify: false }).populate("userId", ["username", "email"]);
+            const isAllowed = isAllowedModify((_c = taskToUpdate.user) === null || _c === void 0 ? void 0 : _c._id, loggedInUserId, loggedInUserRole);
+            if (isAllowed) {
+                yield user_1.User.updateOne({ _id: (_d = taskToUpdate.user) === null || _d === void 0 ? void 0 : _d._id, "tasks._id": taskId }, {
+                    $set: {
+                        "tasks.$.title": title,
+                        "tasks.$.description": description,
+                        "tasks.$.status": status
+                    }
+                });
+                const updatedTask = { _id: taskId, title, description, status };
                 app_1.io.to(room).emit("updatedTask", updatedTask);
             }
             else {
@@ -99,14 +114,12 @@ const updateTask = (taskToUpdate, userId, room) => __awaiter(void 0, void 0, voi
     }
 });
 exports.updateTask = updateTask;
-const deleteTask = (taskId, userId, room) => __awaiter(void 0, void 0, void 0, function* () {
-    if (taskId) {
+const deleteTask = (taskId, taskUserId, loggedInUserId, loggedInUserRole, room) => __awaiter(void 0, void 0, void 0, function* () {
+    if (taskId && taskUserId) {
         try {
-            const task = yield task_1.Task.findOne({ _id: taskId });
-            const loggedInUser = yield user_1.User.findOne({ _id: userId });
-            const isAdmin = (loggedInUser === null || loggedInUser === void 0 ? void 0 : loggedInUser.role) === 0;
-            if (isAdmin || `${task === null || task === void 0 ? void 0 : task.userId._id}` === `${userId}`) {
-                yield task_1.Task.deleteOne({ _id: taskId });
+            const isAllowed = isAllowedModify(taskUserId, loggedInUserId, loggedInUserRole);
+            if (isAllowed) {
+                yield user_1.User.updateOne({ _id: taskUserId }, { $pull: { tasks: { _id: taskId } } });
                 app_1.io.to(room).emit("deletedTaskId", taskId);
             }
         }
@@ -119,3 +132,7 @@ const deleteTask = (taskId, userId, room) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.deleteTask = deleteTask;
+const isAllowedModify = (taskUserId, loggedInUserId, loggedInUserRole) => {
+    const isAdmin = loggedInUserRole === 0;
+    return isAdmin || taskUserId === loggedInUserId;
+};

@@ -13,6 +13,7 @@ const pino_1 = __importDefault(require("pino"));
 const express_pino_logger_1 = __importDefault(require("express-pino-logger"));
 const authRouter_1 = require("./api/routes/authRouter");
 const organizationsRouter_1 = require("./api/routes/organizationsRouter");
+const roomsRouter_1 = require("./api/routes/roomsRouter");
 const tasks_1 = require("./api/controllers/tasks");
 const logger = pino_1.default({ level: process.env.LOG_LEVEL || "info" });
 exports.logger = logger;
@@ -33,17 +34,15 @@ io.on("connection", socket => {
     logger.info("New WS Connection...");
     socket.on("joinRoom", (room) => {
         socket.join(room);
-        socket.on("getInitialTasks", () => {
-            tasks_1.getAllTasks(room);
-        });
+        tasks_1.getAllTasks(room);
         socket.on("createTask", (newTask) => {
             tasks_1.createTask(newTask, room);
         });
-        socket.on("updateTask", ({ updatedTask, userId }) => {
-            tasks_1.updateTask(updatedTask, userId, room);
+        socket.on("updateTask", ({ updatedTask, loggedInUserId, loggedInUserRole }) => {
+            tasks_1.updateTask(updatedTask, loggedInUserId, loggedInUserRole, room);
         });
-        socket.on("deleteTaskId", ({ taskId, userId }) => {
-            tasks_1.deleteTask(taskId, userId, room);
+        socket.on("deleteTask", ({ taskId, taskUserId, loggedInUserId, loggedInUserRole }) => {
+            tasks_1.deleteTask(taskId, taskUserId, loggedInUserId, loggedInUserRole, room);
         });
     });
     socket.on("disconnect", () => {
@@ -55,8 +54,9 @@ app.use(cors_1.default());
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ limit: "10mb", extended: false }));
 app.use(expressLogger);
-app.use(`${prefix}/organizations`, organizationsRouter_1.organizationsRoutes);
 app.use(`${prefix}/auth`, authRouter_1.authRoutes);
+app.use(`${prefix}/organizations`, organizationsRouter_1.organizationsRoutes);
+app.use(`${prefix}/rooms`, roomsRouter_1.roomsRoutes);
 app.use(express_1.default.static(path_1.default.join(__dirname, "build")));
 app.get("/*", (req, res) => {
   res.sendFile(path_1.default.join(__dirname, "build", "index.html"));

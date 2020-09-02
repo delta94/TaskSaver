@@ -17,10 +17,13 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const validator_1 = require("../utils/validator");
 const messages_1 = require("../utils/messages");
+const app_1 = require("../../app");
+const organization_1 = require("../models/organization");
 const { authSucceeded, authFailed, registrationFailed, usernameExists, emailExists, created } = messages_1.messages;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, username, email, password, role, organizationId } = req.body;
     const validationRes = validator_1.validateUser(req.body, validator_1.authFormsTypes.register);
+    const room = organizationId;
     if (validationRes.isValid) {
         try {
             const userByEmail = yield user_1.User.findOne({ email });
@@ -33,9 +36,12 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             }
             const hash = bcrypt_1.default.hashSync(password, 10);
             try {
+                // @ts-ignore
                 const user = yield user_1.User.create({ firstName, lastName, username, email, role, organizationId, password: hash });
-                const userData = { _id: user._id, role };
-                return res.status(200).json({ message: `User ${created}`, user: userData });
+                const organizationName = yield getOrganizationName(organizationId);
+                const userDataForLs = { _id: user._id, role, organizationName };
+                app_1.io.to(room).emit("registrationToRoom", Object.assign(Object.assign({}, userDataForLs), { firstName, lastName }));
+                return res.status(200).json({ message: `User ${created}`, user: userDataForLs });
             }
             catch (err) {
                 return res.status(400).json({ message: registrationFailed });
@@ -63,7 +69,8 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             if (isEqual) {
                 const { _id, username, role, organizationId } = user;
                 const userData = { _id, username, role, organizationId };
-                return res.status(200).json({ message: authSucceeded, user: userData });
+                const organizationName = yield getOrganizationName(organizationId);
+                return res.status(200).json({ message: authSucceeded, user: Object.assign(Object.assign({}, userData), { organizationName }) });
             }
             else {
                 return res.status(401).json({ message: authFailed });
@@ -78,3 +85,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.login = login;
+const getOrganizationName = (organizationId) => __awaiter(void 0, void 0, void 0, function* () {
+    const organization = yield organization_1.Organization.findOne({ _id: organizationId });
+    return organization === null || organization === void 0 ? void 0 : organization.name;
+});
