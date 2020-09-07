@@ -1,0 +1,29 @@
+@import "../../styles/Mixins.scss";
+
+.navbar-wrapper {
+  display: flex;
+
+  .navbar {
+    z-index: 1201;
+
+    .title {
+      flex: 1;
+    }
+
+    img {
+      margin-right: 7px;
+      cursor: pointer;
+    }
+
+    .username {
+      max-width: 150px;
+      @include overflow-handler;
+    }
+
+    @media screen and (max-width: 599px) {
+      .username {
+        max-width: 54px;
+      }
+    }
+  }
+}

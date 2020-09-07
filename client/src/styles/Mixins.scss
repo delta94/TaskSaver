@@ -1,0 +1,16 @@
+@mixin form-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+
+  form {
+    margin-top: 8px;
+  }
+}
+
+@mixin overflow-handler {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

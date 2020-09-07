@@ -1,0 +1,17 @@
+@import "../../../styles/Mixins.scss";
+
+.task-form-button-wrapper {
+  display: inline-block;
+}
+
+.dialog {
+  .form-container {
+    @include form-wrapper;
+
+    .buttons-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+  }
+}

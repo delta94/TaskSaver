@@ -1,0 +1,15 @@
+.tasks-container-wrapper {
+  .title {
+    @media screen and (min-width: 599px) {
+      padding-left: 17%;
+    }
+
+    @media screen and (min-width: 960px) {
+      padding-left: 8%;
+    }
+
+    @media screen and (min-width: 1200px) {
+      padding-left: 0;
+    }
+  }
+}

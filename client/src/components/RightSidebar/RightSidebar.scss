@@ -1,0 +1,22 @@
+.right-sidebar {
+  text-align: center;
+
+  .drawer-content {
+    margin-top: 80px;
+    min-width: 240px;
+
+    &.admin {
+      button {
+        padding-left: 19px;
+        padding-right: 19px;
+      }
+    }
+
+    &:not(.admin) {
+      button {
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+    }
+  }
+}

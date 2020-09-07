@@ -1,0 +1,38 @@
+@import "../../../styles/Mixins.scss";
+
+.tasks-cards-container {
+  .card {
+    padding: 20px 0;
+    height: 100%;
+
+    .card-content {
+      padding: 0;
+      text-align: center;
+
+      .title {
+        padding: 0 20px;
+        @include overflow-handler;
+      }
+
+      .description {
+        padding: 0 20px;
+      }
+
+      .user-details {
+        & > * {
+          margin-top: 10px;
+          padding: 0 20px;
+          @include overflow-handler;
+        }
+      }
+    }
+
+    .actions-wrapper {
+      justify-content: center;
+
+      button {
+        padding: 9px 9px 0;
+      }
+    }
+  }
+}
