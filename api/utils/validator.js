@@ -5,7 +5,7 @@ const emailRegex = new RegExp(/[a-z0-9!#$%&"*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&"*+/
 exports.emailRegex = emailRegex;
 const nameRegex = new RegExp(/[a-zA-Z][a-zA-Z ]+/);
 exports.nameRegex = nameRegex;
-const usernameRegex = new RegExp(/^[a-z0-9_-]{3,16}$/);
+const usernameRegex = new RegExp(/^[a-z0-9_-]{3,16}$/i);
 exports.usernameRegex = usernameRegex;
 const authFormsTypes = {
     login: "Login",
